@@ -1,5 +1,6 @@
 package com.elseff.project.modules.student;
 
+import com.elseff.project.modules.model.Student;
 import com.elseff.project.util.ConsoleColors;
 import org.yaml.snakeyaml.Yaml;
 
@@ -11,6 +12,8 @@ import java.net.URISyntaxException;
 import java.sql.*;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -64,21 +67,14 @@ public class StudentService {
         }
     }
 
-    public int insertIntoStudent(String name) {
+    public Student insertIntoStudent(Student student) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
             Statement statement = connection.createStatement();
-            return statement.executeUpdate(String.format(INSERT_INTO_STUDENT, name));
-        } catch (SQLException e) {
-            System.out.print(ConsoleColors.RESET);
-            System.err.println(e.getMessage());
-            return -1;
-        }
-    }
-
-    public ResultSet selectFromStudent() {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            Statement statement = connection.createStatement();
-            return statement.executeQuery(SELECT_FROM_STUDENT);
+            int resultInserting = statement.executeUpdate(String.format(INSERT_INTO_STUDENT, student.getName()));
+            if (resultInserting == 1)
+                return student;
+            else
+                return null;
         } catch (SQLException e) {
             System.out.print(ConsoleColors.RESET);
             System.err.println(e.getMessage());
@@ -86,10 +82,32 @@ public class StudentService {
         }
     }
 
-    public ResultSet selectFromStudentById(Long id) {
+    public List<Student> selectFromStudent() {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
             Statement statement = connection.createStatement();
-            return statement.executeQuery(String.format(SELECT_FROM_STUDENT_BY_ID, id));
+            ResultSet resultSet = statement.executeQuery(SELECT_FROM_STUDENT);
+
+            List<Student> result = new ArrayList<>();
+            while (resultSet.next()) {
+                result.add(new Student(resultSet.getLong(1), resultSet.getString(2)));
+            }
+            return result;
+        } catch (SQLException e) {
+            System.out.print(ConsoleColors.RESET);
+            System.err.println(e.getMessage());
+            return List.of();
+        }
+    }
+
+    public Student selectFromStudentById(Long id) {
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(String.format(SELECT_FROM_STUDENT_BY_ID, id));
+            Student student = null;
+            while (resultSet.next()) {
+                student = new Student(resultSet.getLong(1), resultSet.getString(2));
+            }
+            return student;
         } catch (SQLException e) {
             System.out.print(ConsoleColors.RESET);
             System.out.println(e.getMessage());
@@ -97,25 +115,31 @@ public class StudentService {
         }
     }
 
-    public int updateStudentName(Long studentId, String name) {
+    public Student updateStudentName(Long studentId, String name) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
             Statement statement = connection.createStatement();
-            return statement.executeUpdate(String.format(UPDATE_STUDENT_NAME, name, studentId));
+            int resultExecuteUpdate = statement.executeUpdate(String.format(UPDATE_STUDENT_NAME, name, studentId));
+            if (resultExecuteUpdate == 1)
+                return new Student(studentId, name);
+            else {
+                return null;
+            }
         } catch (SQLException e) {
             System.out.print(ConsoleColors.RESET);
             System.out.println(e.getMessage());
-            return -1;
+            return null;
         }
     }
 
-    public int deleteFromStudent(Long id) {
+    public boolean deleteFromStudent(Long id) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
             Statement statement = connection.createStatement();
-            return statement.executeUpdate(String.format(DELETE_FROM_STUDENT, id));
+            int resultExecuteUpdate = statement.executeUpdate(String.format(DELETE_FROM_STUDENT, id));
+            return resultExecuteUpdate == 1;
         } catch (SQLException e) {
             System.out.print(ConsoleColors.RESET);
             System.err.println(e.getMessage());
-            return -1;
+            return false;
         }
     }
 }

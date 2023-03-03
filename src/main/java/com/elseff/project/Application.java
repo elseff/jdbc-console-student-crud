@@ -1,10 +1,10 @@
 package com.elseff.project;
 
+import com.elseff.project.modules.model.Student;
 import com.elseff.project.modules.student.StudentService;
 import com.elseff.project.util.ConsoleColors;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.List;
 import java.util.Scanner;
 
 public class Application {
@@ -31,108 +31,78 @@ public class Application {
                     System.out.println("Insert into student...");
                     System.out.print("Write student name: ");
                     String name = scanner.next();
-                    int insertIntoStudent = studentService.insertIntoStudent(name);
-                    if (insertIntoStudent > 0) {
+                    Student student = new Student(name);
+                    Student insertIntoStudent = studentService.insertIntoStudent(student);
+                    if (insertIntoStudent != null)
                         System.out.println("Successful!");
-                    } else {
+                    else
                         System.out.println("Something wrong...");
-                    }
+
                     System.out.println(ConsoleColors.RESET);
                 }
                 case 2 -> {
                     System.out.print(ConsoleColors.CYAN_BOLD);
                     System.out.println("--- STUDENT ---");
-                    ResultSet resultSet = studentService.selectFromStudent();
-                    try {
-                        boolean hasNext = false;
-                        while (resultSet.next()) {
-                            System.out.println("| " + resultSet.getInt(1) + " | " + resultSet.getString(2) + " |");
-                            hasNext = true;
-                        }
-                        if (!hasNext) {
-                            System.out.println("Table student is empty...");
-                        }
-                    } catch (SQLException e) {
-                        System.out.println(e.getMessage());
+                    List<Student> students = studentService.selectFromStudent();
+                    if (students.size() == 0) {
+                        System.out.println("Table student is empty...");
+                    } else {
+                        students.forEach(s -> System.out.println("| " + s.getId() + " | " + s.getName() + " |"));
                     }
                     System.out.println(ConsoleColors.RESET);
                 }
                 case 3 -> {
                     System.out.print(ConsoleColors.PURPLE_BOLD);
                     System.out.println("Updating student name");
-                    ResultSet resultSet = studentService.selectFromStudent();
-                    try {
-                        boolean hasNext = false;
-                        while (resultSet.next()) {
-                            System.out.println("| " + resultSet.getInt(1) + " | " + resultSet.getString(2) + " |");
-                            hasNext = true;
-                        }
-                        if (!hasNext) {
-                            System.out.println("Table student is empty...");
-                        } else {
-                            System.out.println("Select student: ");
-                            Long studentId = scanner.nextLong();
+                    List<Student> students = studentService.selectFromStudent();
+                    if (students.size() == 0) {
+                        System.out.println("Table student is empty...");
+                    } else {
+                        students.forEach(s -> System.out.println("| " + s.getId() + " | " + s.getName() + " |"));
+                        System.out.println("Select student: ");
+                        Long studentId = scanner.nextLong();
 
-                            ResultSet studentByIdRS = studentService.selectFromStudentById(studentId);
-                            String studentName = null;
-                            while (studentByIdRS.next()) {
-                                studentName = studentByIdRS.getString(2);
-                            }
-                            if (studentName != null) {
-                                System.out.println("Write new name");
-                                String updatedName = scanner.next();
+                        Student student = studentService.selectFromStudentById(studentId);
+                        if (student != null) {
+                            System.out.println("Write new name");
+                            String updatedName = scanner.next();
 
-                                int i = studentService.updateStudentName(studentId, updatedName);
-                                if (i > 0) {
-                                    System.out.println("Successful!");
-                                } else {
-                                    System.out.println("Something wrong...");
-                                }
+                            Student updatedStudent = studentService.updateStudentName(studentId, updatedName);
+                            if (updatedStudent != null) {
+                                System.out.println("Successful!");
                             } else {
-                                System.out.println("Could now find student with id: " + studentId);
+                                System.out.println("Something wrong...");
                             }
+                        } else {
+                            System.out.println("Could now find student with id: " + studentId);
                         }
-                    } catch (SQLException e) {
-                        System.out.println(e.getMessage());
                     }
                 }
                 case 4 -> {
                     System.out.print(ConsoleColors.RED);
                     System.out.println("Delete from student");
-                    ResultSet resultSet = studentService.selectFromStudent();
-                    try {
-                        boolean hasNext = false;
-                        while (resultSet.next()) {
-                            System.out.println("| " + resultSet.getInt(1) + " | " + resultSet.getString(2) + " |");
-                            hasNext = true;
-                        }
-                        if (!hasNext) {
-                            System.out.println("Table student is empty...");
-                        } else {
-                            System.out.print("Write student id: ");
-                            long id = scanner.nextLong();
+                    List<Student> students = studentService.selectFromStudent();
+                    if (students.size() == 0) {
+                        System.out.println("Table student is empty...");
+                    } else {
+                        students.forEach(s -> System.out.println("| " + s.getId() + " | " + s.getName() + " |"));
+                        System.out.print("Write student id: ");
+                        long id = scanner.nextLong();
 
-                            ResultSet studentByIdResultSet = studentService.selectFromStudentById(id);
-                            String studentName = null;
-                            while (studentByIdResultSet.next()) {
-                                studentName = studentByIdResultSet.getString(2);
-                            }
-                            if (studentName != null) {
-                                int deleteFromStudent = studentService.deleteFromStudent(id);
-                                if (deleteFromStudent > 0) {
-                                    System.out.println("Successful!");
-                                } else {
-                                    System.out.println("Something wrong...");
-                                }
+                        Student student = studentService.selectFromStudentById(id);
+
+                        if (student != null) {
+                            boolean deleteFromStudent = studentService.deleteFromStudent(id);
+                            if (deleteFromStudent) {
+                                System.out.println("Successful!");
                             } else {
-                                System.out.println("Could now find student with id: " + id);
+                                System.out.println("Something wrong...");
                             }
+                        } else {
+                            System.out.println("Could now find student with id: " + id);
                         }
-                        System.out.println(ConsoleColors.RESET);
-                    } catch (SQLException e) {
-                        System.out.print(ConsoleColors.RESET);
-                        System.out.println(e.getMessage());
                     }
+                    System.out.println(ConsoleColors.RESET);
                 }
             }
         }
