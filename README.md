@@ -1,5 +1,5 @@
 # jdbc-console-student-crud
-> Console CRUD application using Java Core, JDBC, Shakeyamlm PostgreSQL
+> Console CRUD application using Java Core, JDBC, ShakeYaml, PostgreSQL
 
 ![image](https://user-images.githubusercontent.com/68866537/222669074-63908823-8cd5-49e0-972a-3f8e322f648f.png)
 
