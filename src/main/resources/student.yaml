@@ -1,0 +1,3 @@
+db_url: 'jdbc:postgresql://localhost:3307/learn_jdbc'
+db_user: 'postgres'
+db_password: '1234'
